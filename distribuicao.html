@@ -36,13 +36,9 @@
 <div class="sub">Quanto cada pessoa já panfletou</div>
 <div class="list" id="list"><div class="empty">Carregando&hellip;</div></div>
 
-<script src="config.js"></script>
 <script>
 (function(){
   "use strict";
-  var CFG = window.PANFLETO_CONFIG || {};
-  var ONLINE = !!(CFG.url && CFG.key);
-  var API = ONLINE ? CFG.url.replace(/\/+$/,"") + "/rest/v1/panfletagens" : null;
 
   function haversineKm(a,b){
     var R=6371, toRad=Math.PI/180;
@@ -69,14 +65,8 @@
   }
 
   async function load(){
-    if(!ONLINE){
-      document.getElementById("list").innerHTML='<div class="err">Site em modo local: configure o config.js para ver o ranking.</div>';
-      return;
-    }
     try{
-      var r = await fetch(API+"?select=pessoa,geom,tipo&tipo=eq.panfletada", {
-        headers:{ "apikey":CFG.key, "Authorization":"Bearer "+CFG.key }
-      });
+      var r = await fetch("data/panfletagens.json");
       if(!r.ok) throw new Error(r.status);
       var rows = await r.json();
       var stats = {};
@@ -93,7 +83,7 @@
       var list = Object.keys(stats).map(function(k){return stats[k];}).sort(function(a,b){return b.km-a.km;});
       render(list);
     }catch(e){
-      document.getElementById("list").innerHTML='<div class="err">Não consegui carregar os dados do banco.</div>';
+      document.getElementById("list").innerHTML='<div class="err">Não consegui carregar os registros.</div>';
     }
   }
   load();
